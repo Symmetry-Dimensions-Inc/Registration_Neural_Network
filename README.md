@@ -33,6 +33,9 @@ The first step is to run the docker container inside `dcpcr/`:
 ```sh
 make run
 ```
+In case running docker container results in the following error (due to --gpu flag):
+**docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]].**
+A solution to that can be found [here](https://askubuntu.com/questions/1400476/docker-error-response-from-daemon-could-not-select-device-driver-with-capab).
 
 The following commands assume to be run inside the docker container.
 
