@@ -37,8 +37,6 @@ def main(config, weights, checkpoint, data_config):
     cfg = yaml.safe_load(open(config))
     data_cfg = yaml.safe_load(open(data_config))
     cfg['data_loader'] = data_cfg
-    cfg['git_commit_version'] = str(subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD']).strip())
 
     print(f"!!! Starting Experiment: {cfg['experiment']['id']} !!!")
 
