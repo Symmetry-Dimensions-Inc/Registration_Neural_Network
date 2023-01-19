@@ -1,4 +1,4 @@
-batch_size: 5
+batch_size: 4
 num_worker: 6
 train:
   class: "Map2Map"
