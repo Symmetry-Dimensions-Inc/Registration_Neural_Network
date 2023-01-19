@@ -40,8 +40,8 @@ RUN pip3 install \
 # setup environment
 ARG USER_ID
 ARG GROUP_ID
-RUN addgroup --gid $GROUP_ID user
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user
+# RUN addgroup --gid $GROUP_ID user
+# RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID user
 
 # Provide a data directory to share data across docker and the host system
 RUN mkdir -p /data
