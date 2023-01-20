@@ -14,7 +14,7 @@ from dcpcr.utils import pcd_visualizer, utils
               '-dc',
               type=str,
               help='path to the config file (.yaml) for the dataloader',
-              default=join(utils.CONFIG_DIR, 'data_config.yaml'))
+              default=join(utils.CONFIG_DIR, 'data_config_server.yaml'))
 @click.option('--checkpoint',
               '-c',
               type=str,
