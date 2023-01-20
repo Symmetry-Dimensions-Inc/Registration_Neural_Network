@@ -12,7 +12,7 @@ train:
   validation: False
   mask_validation: True
   pad: True
-  use_cache: False
+  use_cache: True
   file_format: '.npy'
   num_points_pad: 2000
   scale: 40
@@ -28,7 +28,7 @@ val:
   validation: True
   mask_validation: True
   pad: True
-  use_cache: False
+  use_cache: True
   file_format: '.npy'
   num_points_pad: 2000
   scale: 40
@@ -44,7 +44,7 @@ test:
   validation: True
   mask_validation: True
   pad: True
-  use_cache: False
+  use_cache: True
   file_format: '.npy'
   num_points_pad: 2000
   scale: 40
