@@ -108,3 +108,12 @@ def torch2o3d(pcd, colors=None, estimate_normals=False):
     if colors is not None:
         pcl.colors = o3d.utility.Vector3dVector(colors)
     return pcl
+
+def normalize_pc(points):
+        centroid = np.mean(points, axis=0)
+        points -= centroid
+        furthest_distance = np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
+        points /= furthest_distance
+
+        return points
+

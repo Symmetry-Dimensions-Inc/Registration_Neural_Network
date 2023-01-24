@@ -4,14 +4,10 @@ from os.path import join, dirname, abspath
 import numpy as np
 import torch
 import dcpcr.models.models as models
+from dcpcr.utils.utils import normalize_pc
 
 @click.command()
 # Add your options here
-@click.option('--data_config',
-              '-dc',
-              type=str,
-              help='path to the config file (.yaml) for the dataloader',
-              default=join(dirname(abspath(__file__)), 'config/data_config.yaml'))
 @click.option('--checkpoint',
               '-ckpt',
               type=str,
@@ -21,27 +17,9 @@ import dcpcr.models.models as models
               type=bool,
               help='Whether to fine tune with icp or not.',
               default=True)
-@click.option('--distance_threshold',
-              '-dt',
-              type=float,
-              help='icp robust kernel distance threshold',
-              default=1)
-@click.option('--compressed',
-              '-c',
-              type=bool,
-              help='Whether to fine tune on compressed or input data',
-              default=True)
 
 
-def main(checkpoint, data_config, fine_tune, distance_threshold, compressed):
-
-    def normalize_pc(points):
-        centroid = np.mean(points, axis=0)
-        points -= centroid
-        furthest_distance = np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
-        points /= furthest_distance
-
-        return points
+def main(checkpoint, fine_tune):
     cfg = torch.load(checkpoint)['hyper_parameters']
     cfg['checkpoint'] = checkpoint
 
