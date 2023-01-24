@@ -4,7 +4,7 @@ from os.path import join, dirname, abspath
 import numpy as np
 import torch
 import dcpcr.models.models as models
-from dcpcr.utils.utils import normalize_pc
+from dcpcr.utils.utils import extractPc
 
 @click.command()
 # Add your options here
@@ -27,30 +27,13 @@ def main(checkpoint, fine_tune):
     source = o3d.io.read_point_cloud("./pcds/cloud_bin_0.pcd")
     target = o3d.io.read_point_cloud("./pcds/cloud_bin_1.pcd")
     # Downsample
-    downpcd_source = source .voxel_down_sample(voxel_size=0.05)
+    downpcd_source = source.voxel_down_sample(voxel_size=0.05)
     downpcd_target = target.voxel_down_sample(voxel_size=0.05)
 
     length = min(len(downpcd_target.points), len(downpcd_source.points))
-    # Extract the xyz points from source
-    xyz_source = np.asarray(downpcd_source.points)
-    clr_source = np.asarray(downpcd_source.colors)
-    # Normalize
-    xyz_source = normalize_pc(xyz_source)
-    data_source = np.zeros((1,length, 6))
-
-    data_source[0,:,:3] = xyz_source[:length,:]
-    data_source[0,:,3:6] = clr_source[:length,:]
     
-    # Extract the xyz points from target
-    xyz_target = np.asarray(downpcd_target.points)
-    clr_target = np.asarray(downpcd_target.colors)
-    # Normalize
-    xyz_target = normalize_pc(xyz_target)
-
-    data_target = np.zeros((1,length, 6))
-
-    data_target[0,:,:3] = xyz_target[:length,:]
-    data_target[0,:,3:6] = clr_target[:length,:]
+    data_source, xyz_source, clr_source = extractPc(downpcd_source, length, normalize=True)
+    data_target, xyz_target, clr_target = extractPc(downpcd_target, length, normalize=True)
 
     # Prepare result
     result = np.ones((length, 4))

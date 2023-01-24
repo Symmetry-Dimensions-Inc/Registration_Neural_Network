@@ -109,7 +109,7 @@ def torch2o3d(pcd, colors=None, estimate_normals=False):
         pcl.colors = o3d.utility.Vector3dVector(colors)
     return pcl
 
-def normalize_pc(points):
+def normalizePc(points):
         centroid = np.mean(points, axis=0)
         points -= centroid
         furthest_distance = np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
@@ -117,3 +117,15 @@ def normalize_pc(points):
 
         return points
 
+def extractPc(pcd, length, normalize=False):
+    # Extract the xyzrgb points from pcd
+    xyz = np.asarray(pcd.points)
+    clr = np.asarray(pcd.colors)
+    # Normalize
+    if normalize:
+        xyz = normalizePc(xyz)
+    # Extract normalized values and store within np array
+    data = np.zeros((1,length, 6))
+    data[0,:,:3] = xyz[:length,:]
+    data[0,:,3:6] = clr[:length,:]
+    return data, xyz, clr
