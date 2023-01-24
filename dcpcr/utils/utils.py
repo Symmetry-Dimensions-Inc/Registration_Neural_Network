@@ -129,3 +129,11 @@ def extractPc(pcd, length, normalize=False):
     data[0,:,:3] = xyz[:length,:]
     data[0,:,3:6] = clr[:length,:]
     return data, xyz, clr
+
+def transform(points, T, device):
+    shape = list(points.shape)
+    shape[-1] = 1
+    ps_t = torch.cat([points[..., :, :3], torch.ones(shape, device=device)], -1)
+    ps_t = (T@ps_t.transpose(-1, -2)).transpose(-1, -2)
+    ps_t = ps_t[0, :, :3]
+    return ps_t
