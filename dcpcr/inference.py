@@ -1,10 +1,11 @@
 import open3d as o3d
+import laspy as lp
 import click
 from os.path import join, dirname, abspath
 import numpy as np
 import torch
 import dcpcr.models.models as models
-from dcpcr.utils.utils import extractPc, transform
+from dcpcr.utils.utils import extractPc, transform, normalizePc
 from dcpcr.utils import fine_tuner
 
 @click.command()
@@ -18,40 +19,35 @@ from dcpcr.utils import fine_tuner
               type=bool,
               help='Whether to fine tune with icp or not.',
               default=True)
+@click.option('--voxel_size',
+              '-vs',
+              type=float,
+              help='voxel size for downsampling.',
+              default=0.05)
 
-
-def main(checkpoint, fine_tune):
+def main(checkpoint, fine_tune, voxel_size):
     cfg = torch.load(checkpoint)['hyper_parameters']
     cfg['checkpoint'] = checkpoint
 
-    #data = np.load("/data/apollo-compressed/TrainData/ColumbiaPark/2018-10-03/submaps/019417.npy")
     source = o3d.io.read_point_cloud("./pcds/cloud_bin_0.pcd")
     #R = source.get_rotation_matrix_from_xyz((0, 0, 0.3 * np.pi))
     #source = source.rotate(R, center=(0,0,0))
     target = o3d.io.read_point_cloud("./pcds/cloud_bin_1.pcd")
     # Downsample
-    downpcd_source = source.voxel_down_sample(voxel_size=0.05)
-    downpcd_target = target.voxel_down_sample(voxel_size=0.05)
-
-    length = min(len(downpcd_target.points), len(downpcd_source.points))
+    downpcd_source = source.voxel_down_sample(voxel_size=voxel_size)
+    downpcd_target = target.voxel_down_sample(voxel_size=voxel_size)
     
-    data_source, xyz_source, clr_source = extractPc(downpcd_source, length, normalize=True)
-    data_target, xyz_target, clr_target = extractPc(downpcd_target, length, normalize=True)
-
-    # Prepare result
-    result = np.ones((length, 4))
-    result[:,:3] = data_source[0,:,:3]
+    data_source, xyz_source, clr_source = extractPc(downpcd_source, normalize=True)
+    data_target, xyz_target, clr_target = extractPc(downpcd_target, normalize=True)
 
     # Visualize
     pcd_source = o3d.geometry.PointCloud()
     pcd_source.points = o3d.utility.Vector3dVector(xyz_source)
     pcd_source.paint_uniform_color(np.array([0, 1, 0]))
-    #pcd_source.colors = o3d.utility.Vector3dVector(clr_source)
 
     pcd_target = o3d.geometry.PointCloud()
     pcd_target.points = o3d.utility.Vector3dVector(xyz_target)
     pcd_target.paint_uniform_color(np.array([1, 0, 0]))
-    #pcd_target.colors = o3d.utility.Vector3dVector(clr_target)
 
     xyz_source  = torch.tensor(data_source, device=0).float()
     xyz_target  = torch.tensor(data_target, device=0).float()
@@ -59,8 +55,9 @@ def main(checkpoint, fine_tune):
     model = models.DCPCR.load_from_checkpoint(
         checkpoint).to(torch.device("cuda"))
     
-    model.eval()
-    est_pose, w, target_corr, weights = model(xyz_target, xyz_source)
+    model = model.eval()
+    with torch.no_grad():
+        est_pose, _, _, _ = model(xyz_target, xyz_source)
 
     if fine_tune:
         init_guess = est_pose.detach().cpu().squeeze().numpy()

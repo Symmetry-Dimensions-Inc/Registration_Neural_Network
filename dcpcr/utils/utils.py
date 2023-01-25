@@ -117,10 +117,11 @@ def normalizePc(points):
 
         return points
 
-def extractPc(pcd, length, normalize=False):
+def extractPc(pcd, normalize=False):
     # Extract the xyzrgb points from pcd
     xyz = np.asarray(pcd.points)
     clr = np.asarray(pcd.colors)
+    length = len(pcd.points)
     # Normalize
     if normalize:
         xyz = normalizePc(xyz)
