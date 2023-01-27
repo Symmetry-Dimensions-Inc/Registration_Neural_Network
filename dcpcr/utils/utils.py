@@ -108,3 +108,52 @@ def torch2o3d(pcd, colors=None, estimate_normals=False):
     if colors is not None:
         pcl.colors = o3d.utility.Vector3dVector(colors)
     return pcl
+
+def normalizePc(points):
+        centroid = np.mean(points, axis=0)
+        points -= centroid
+        furthest_distance = np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
+        points /= furthest_distance
+
+        return points
+
+def extractPc(pcd, normalize=False):
+    # Extract the xyzrgb points from pcd
+    xyz = np.asarray(pcd.points)
+    clr = np.asarray(pcd.colors)
+    length = len(pcd.points)
+    # Normalize
+    if normalize:
+        xyz = normalizePc(xyz)
+    # Extract normalized values and store within np array
+    data = np.zeros((1,length, 6))
+    data[0,:,:3] = xyz[:length,:]
+    data[0,:,3:6] = clr[:length,:]
+    return data, xyz, clr
+
+def transform(points, T, device):
+    shape = list(points.shape)
+    shape[-1] = 1
+    ps_t = torch.cat([points[..., :, :3], torch.ones(shape, device=device)], -1)
+    ps_t = (T@ps_t.transpose(-1, -2)).transpose(-1, -2)
+    ps_t = ps_t[0, :, :3]
+    return ps_t
+
+def scaledLas(las_file):
+    # Extract coordinates
+    x_dimension = las_file.X
+    y_dimension = las_file.Y
+    z_dimension = las_file.Z
+    # Extract scaling factors
+    x_scale = las_file.header.scales[0]
+    y_scale = las_file.header.scales[1]
+    z_scale = las_file.header.scales[2]
+    # Extract offsets
+    x_offset = las_file.header.offsets[0]
+    y_offset = las_file.header.offsets[1]
+    z_offset = las_file.header.offsets[2]
+    # Scale pcd
+    las_file.X = (x_dimension * x_scale) + x_offset
+    las_file.Y = (y_dimension * y_scale) + y_offset
+    las_file.Z = (z_dimension * z_scale) + z_offset
+    return
