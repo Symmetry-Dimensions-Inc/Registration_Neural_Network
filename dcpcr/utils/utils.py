@@ -138,3 +138,22 @@ def transform(points, T, device):
     ps_t = (T@ps_t.transpose(-1, -2)).transpose(-1, -2)
     ps_t = ps_t[0, :, :3]
     return ps_t
+
+def scaledLas(las_file):
+    # Extract coordinates
+    x_dimension = las_file.X
+    y_dimension = las_file.Y
+    z_dimension = las_file.Z
+    # Extract scaling factors
+    x_scale = las_file.header.scales[0]
+    y_scale = las_file.header.scales[1]
+    z_scale = las_file.header.scales[2]
+    # Extract offsets
+    x_offset = las_file.header.offsets[0]
+    y_offset = las_file.header.offsets[1]
+    z_offset = las_file.header.offsets[2]
+    # Scale pcd
+    las_file.X = (x_dimension * x_scale) + x_offset
+    las_file.Y = (y_dimension * y_scale) + y_offset
+    las_file.Z = (z_dimension * z_scale) + z_offset
+    return
