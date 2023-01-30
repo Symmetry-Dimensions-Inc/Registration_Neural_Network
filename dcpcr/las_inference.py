@@ -30,15 +30,12 @@ def main(checkpoint, fine_tune):
     scaledLas(laz_source)
     points_source = np.vstack([laz_source.X, laz_source.Y, laz_source.Z]).transpose().astype(np.float32)
     points_source = normalizePc(points_source)
-    points_source[:,2] += 1.5
     colors_source = np.vstack([laz_source.red, laz_source.green, laz_source.blue]).transpose()/65535
-    #colors_source = colors_source[::2,:]
     
     scaledLas(laz_target)
     points_target = np.vstack([laz_target.X, laz_target.Y, laz_target.Z]).transpose().astype(np.float32)
     points_target = normalizePc(points_target)
     colors_target = np.vstack([laz_target.red, laz_target.green, laz_target.blue]).transpose()/65535
-    #colors_target = colors_target[1::2,:]
 
     geom_target = o3d.geometry.PointCloud()
     geom_target.points = o3d.utility.Vector3dVector(points_target)
@@ -47,19 +44,13 @@ def main(checkpoint, fine_tune):
     geom_source = o3d.geometry.PointCloud()
     geom_source.points = o3d.utility.Vector3dVector(points_source)
     geom_source.colors = o3d.utility.Vector3dVector(colors_source)
-    #R = geom_source.get_rotation_matrix_from_xyz((0, 0, 0.2 * np.pi))
-    #geom_source = geom_source.rotate(R, center=(0,0,0))
     # Downsample
-    #geom_source= geom_source.voxel_down_sample(voxel_size=0.01)
-    #geom_target = geom_target.voxel_down_sample(voxel_size=0.01)
-    
-    geom_source= geom_source.uniform_down_sample(500)
-    geom_target = geom_target.uniform_down_sample(500)
+    geom_source= geom_source.voxel_down_sample(voxel_size=0.01)
+    geom_target = geom_target.voxel_down_sample(voxel_size=0.01)
 
     data_source, xyz_source, clr_source = extractPc(geom_source, normalize=False)   
     data_target, xyz_target, clr_target = extractPc(geom_target, normalize=False)
-    print(xyz_source.shape, xyz_target.shape)
-
+    
     data_source  = torch.tensor(data_source, device=0).float()
     data_target  = torch.tensor(data_target, device=0).float()
 
@@ -79,7 +70,6 @@ def main(checkpoint, fine_tune):
         est_pose = torch.tensor(
                 est_pose, device=0, dtype=torch.float)
 
-    print(est_pose)
     ps_t = transform(data_source, est_pose, device=0)
     ps_t = ps_t.cpu().detach().numpy()
 
