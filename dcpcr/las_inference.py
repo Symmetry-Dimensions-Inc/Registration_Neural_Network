@@ -19,9 +19,13 @@ from dcpcr.utils import fine_tuner
               type=bool,
               help='Whether to fine tune with icp or not.',
               default=True)
+@click.option('--voxel_size',
+              '-vs',
+              type=float,
+              help='voxel size for downsampling.',
+              default=0.01)
 
-
-def main(checkpoint, fine_tune):
+def main(checkpoint, fine_tune, voxel_size):
     cfg = torch.load(checkpoint)['hyper_parameters']
     cfg['checkpoint'] = checkpoint
     laz_source = lp.read("./pcds/hotel.las")
@@ -45,8 +49,8 @@ def main(checkpoint, fine_tune):
     geom_source.points = o3d.utility.Vector3dVector(points_source)
     geom_source.colors = o3d.utility.Vector3dVector(colors_source)
     # Downsample
-    geom_source= geom_source.voxel_down_sample(voxel_size=0.01)
-    geom_target = geom_target.voxel_down_sample(voxel_size=0.01)
+    geom_source= geom_source.voxel_down_sample(voxel_size=voxel_size)
+    geom_target = geom_target.voxel_down_sample(voxel_size=voxel_size)
 
     data_source, xyz_source, clr_source = extractPc(geom_source, normalize=False)   
     data_target, xyz_target, clr_target = extractPc(geom_target, normalize=False)
