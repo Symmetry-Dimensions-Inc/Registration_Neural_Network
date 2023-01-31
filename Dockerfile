@@ -28,7 +28,8 @@ RUN pip3 install \
     open3d==0.15.2 \
     Click==7.0 \
     setuptools==59.5.0 \
-    PyYAML==6.0
+    PyYAML==6.0 \
+    laspy==2.3.0
 
 # RUN pip3 install \
 #     torch==1.10.1+cu102 \
