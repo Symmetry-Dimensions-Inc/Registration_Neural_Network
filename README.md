@@ -80,15 +80,15 @@ The scripts can be run as before inside the docker container. Only the `dcpcr/co
 
 ## Inference on other pointcloud data
 
-To test the model on data other that Apollo. You can run the following scripts.\\
+To test the model on data other that Apollo. You can run the following scripts.
 
 If the data is in `.pcd` format:
 ```sh
-python inference.py -ckpt [path_to_checkpoint] [optional -ft False]
+python inference.py -ckpt [path_to_checkpoint] [optional] -ft False
 ```
 If the data is in `.las` format:
 ```sh
-python las_inference.py -ckpt [path_to_checkpoint] [optional -ft False]
+python las_inference.py -ckpt [path_to_checkpoint] [optional] -ft False
 ```
 We recommand to use the pretrained [model](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) for inference.
 
