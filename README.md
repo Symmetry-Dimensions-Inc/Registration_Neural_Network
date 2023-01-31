@@ -77,3 +77,19 @@ Use `pip3 install -e .` to install dcpcr.
 ### Running the code
 
 The scripts can be run as before inside the docker container. Only the `dcpcr/config/data_config.yaml` might need to be updated.
+
+## Inference on other pointcloud data
+
+To test the model on data other that Apollo. You can run the following scripts.
+
+If the data is in `.pcd` format:
+```sh
+python inference.py -ckpt [path_to_checkpoint] [optional] -ft False
+```
+If the data is in `.las` format:
+```sh
+python las_inference.py -ckpt [path_to_checkpoint] [optional] -ft False
+```
+We recommand to use the pretrained [model](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) for inference.
+
+Inference script can not be fully run inside a docker container (because of open3d visualization). If you would like to visualize the registration results these scripts should be outside of the docker container.
