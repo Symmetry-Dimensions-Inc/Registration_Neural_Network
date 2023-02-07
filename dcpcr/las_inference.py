@@ -47,11 +47,6 @@ def main(checkpoint, fine_tune, voxel_size):
     points_target = np.vstack([laz_target.X, laz_target.Y, laz_target.Z]).transpose().astype(np.float32)
     points_target = normalizePc(points_target)
     colors_target = np.vstack([laz_target.red, laz_target.green, laz_target.blue]).transpose()
-    # Check whether source and target have the same scale
-    if source_scale >= target_scale:
-        points_source /= (source_scale/target_scale)
-    else:
-        points_target /= (target_scale/source_scale)
 
     geom_target = o3d.geometry.PointCloud()
     geom_target.points = o3d.utility.Vector3dVector(points_target)
