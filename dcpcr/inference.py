@@ -26,6 +26,12 @@ from dcpcr.utils import fine_tuner
               default=0.04)
 
 def main(checkpoint, fine_tune, voxel_size):
+    # Check device
+    if torch.cuda.is_available(): 
+        dev = "cuda:0" 
+    else: 
+        dev = "cpu"
+    
     cfg = torch.load(checkpoint)['hyper_parameters']
     cfg['checkpoint'] = checkpoint
 
@@ -47,11 +53,11 @@ def main(checkpoint, fine_tune, voxel_size):
     pcd_target.points = o3d.utility.Vector3dVector(xyz_target)
     pcd_target.paint_uniform_color(np.array([1, 0, 0]))
 
-    data_source  = torch.tensor(data_source, device=0).float()
-    data_target  = torch.tensor(data_target, device=0).float()
+    data_source  = torch.tensor(data_source, device=dev).float()
+    data_target  = torch.tensor(data_target, device=dev).float()
     # Load model
     model = models.DCPCR.load_from_checkpoint(
-        checkpoint).to(torch.device("cuda"))
+        checkpoint).to(dev)
     model = model.eval()
     # Inference
     with torch.no_grad():
@@ -65,10 +71,10 @@ def main(checkpoint, fine_tune, voxel_size):
                                                 init_guess,
                                                 distance_threshold=1/40)
         est_pose = torch.tensor(
-                est_pose, device=0, dtype=torch.float)
+                est_pose, device=dev, dtype=torch.float)
 
     # Get the transformed point cloud
-    ps_t = transform(data_source, est_pose, device=0)
+    ps_t = transform(data_source, est_pose, device=dev)
     ps_t = ps_t.cpu().detach().numpy()
 
     # Visualize result
