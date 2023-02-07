@@ -28,18 +28,24 @@ from dcpcr.utils import fine_tuner
 def main(checkpoint, fine_tune, voxel_size):
     cfg = torch.load(checkpoint)['hyper_parameters']
     cfg['checkpoint'] = checkpoint
-    laz_source = lp.read("./pcds/hotel.las")
-    laz_target = lp.read("./pcds/hotel.las")
+    
+    laz_source = lp.read("/mnt/ssd1n1/Similarity/Data/Point_clouds/GREEN/building_0_points.las")
+    laz_target = lp.read("/mnt/ssd1n1/Similarity/Data/LOD2/GREEN/Point_clouds/building_0.las")
 
-    scaledLas(laz_source)
+    source_scale = scaledLas(laz_source)
     points_source = np.vstack([laz_source.X, laz_source.Y, laz_source.Z]).transpose().astype(np.float32)
     points_source = normalizePc(points_source)
-    colors_source = np.vstack([laz_source.red, laz_source.green, laz_source.blue]).transpose()/65535
+    colors_source = np.vstack([laz_source.red, laz_source.green, laz_source.blue]).transpose()
     
-    scaledLas(laz_target)
+    target_scale = scaledLas(laz_target)
     points_target = np.vstack([laz_target.X, laz_target.Y, laz_target.Z]).transpose().astype(np.float32)
     points_target = normalizePc(points_target)
-    colors_target = np.vstack([laz_target.red, laz_target.green, laz_target.blue]).transpose()/65535
+    colors_target = np.vstack([laz_target.red, laz_target.green, laz_target.blue]).transpose()
+    # Check whether source and target have the same scale
+    if source_scale >= target_scale:
+        points_source /= (source_scale/target_scale)
+    else:
+        points_target /= (target_scale/source_scale)
 
     geom_target = o3d.geometry.PointCloud()
     geom_target.points = o3d.utility.Vector3dVector(points_target)
@@ -70,7 +76,7 @@ def main(checkpoint, fine_tune, voxel_size):
         est_pose = fine_tuner.refine_registration(  geom_source,
                                                 geom_target,
                                                 init_guess,
-                                                distance_threshold=1.0)
+                                                distance_threshold=voxel_size*5)
         est_pose = torch.tensor(
                 est_pose, device=0, dtype=torch.float)
 
