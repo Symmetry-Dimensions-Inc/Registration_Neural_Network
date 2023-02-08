@@ -110,12 +110,12 @@ def torch2o3d(pcd, colors=None, estimate_normals=False):
     return pcl
 
 def normalizePc(points):
+    if points.size != 0:    
         centroid = np.mean(points, axis=0)
         points -= centroid
         furthest_distance = np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
         points /= furthest_distance
-
-        return points
+    return points
 
 def extractPc(pcd, normalize=False):
     # Extract the xyzrgb points from pcd
