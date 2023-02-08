@@ -26,20 +26,27 @@ from dcpcr.utils import fine_tuner
               default=0.01)
 
 def main(checkpoint, fine_tune, voxel_size):
+    # Check device
+    if torch.cuda.is_available(): 
+        dev = "cuda:0" 
+    else: 
+        dev = "cpu"
+
     cfg = torch.load(checkpoint)['hyper_parameters']
     cfg['checkpoint'] = checkpoint
-    laz_source = lp.read("./pcds/hotel.las")
-    laz_target = lp.read("./pcds/hotel.las")
+    
+    laz_source = lp.read("/mnt/ssd1n1/Similarity/Data/Point_clouds/GREEN/building_0_points.las")
+    laz_target = lp.read("/mnt/ssd1n1/Similarity/Data/LOD2/GREEN/Point_clouds/building_0.las")
 
-    scaledLas(laz_source)
+    source_scale = scaledLas(laz_source)
     points_source = np.vstack([laz_source.X, laz_source.Y, laz_source.Z]).transpose().astype(np.float32)
     points_source = normalizePc(points_source)
-    colors_source = np.vstack([laz_source.red, laz_source.green, laz_source.blue]).transpose()/65535
+    colors_source = np.vstack([laz_source.red, laz_source.green, laz_source.blue]).transpose()
     
-    scaledLas(laz_target)
+    target_scale = scaledLas(laz_target)
     points_target = np.vstack([laz_target.X, laz_target.Y, laz_target.Z]).transpose().astype(np.float32)
     points_target = normalizePc(points_target)
-    colors_target = np.vstack([laz_target.red, laz_target.green, laz_target.blue]).transpose()/65535
+    colors_target = np.vstack([laz_target.red, laz_target.green, laz_target.blue]).transpose()
 
     geom_target = o3d.geometry.PointCloud()
     geom_target.points = o3d.utility.Vector3dVector(points_target)
@@ -55,11 +62,11 @@ def main(checkpoint, fine_tune, voxel_size):
     data_source, xyz_source, clr_source = extractPc(geom_source, normalize=False)   
     data_target, xyz_target, clr_target = extractPc(geom_target, normalize=False)
     
-    data_source  = torch.tensor(data_source, device=0).float()
-    data_target  = torch.tensor(data_target, device=0).float()
+    data_source  = torch.tensor(data_source, device=dev).float()
+    data_target  = torch.tensor(data_target, device=dev).float()
 
     model = models.DCPCR.load_from_checkpoint(
-        checkpoint).to(torch.device("cuda"))
+        checkpoint).to(dev)
     
     model = model.eval()
     with torch.no_grad():
@@ -70,11 +77,11 @@ def main(checkpoint, fine_tune, voxel_size):
         est_pose = fine_tuner.refine_registration(  geom_source,
                                                 geom_target,
                                                 init_guess,
-                                                distance_threshold=1.0)
+                                                distance_threshold=voxel_size*5)
         est_pose = torch.tensor(
-                est_pose, device=0, dtype=torch.float)
+                est_pose, device=dev, dtype=torch.float)
 
-    ps_t = transform(data_source, est_pose, device=0)
+    ps_t = transform(data_source, est_pose, device=dev)
     ps_t = ps_t.cpu().detach().numpy()
 
     pcd_result = o3d.geometry.PointCloud()

@@ -156,4 +156,4 @@ def scaledLas(las_file):
     las_file.X = (x_dimension * x_scale) + x_offset
     las_file.Y = (y_dimension * y_scale) + y_offset
     las_file.Z = (z_dimension * z_scale) + z_offset
-    return
+    return x_scale
