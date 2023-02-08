@@ -30,8 +30,13 @@ from dcpcr.utils import fine_tuner
               type=float,
               help='ratio to define the similarity between two buildings',
               default=50)
+@click.option('--visualize',
+              '-vis',
+              type=bool,
+              help='Whether to visualize the aligned pointcloud.',
+              default=False)
 
-def main(checkpoint, fine_tune, voxel_size, similarity_ratio):
+def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
     # Check device
     if torch.cuda.is_available(): 
         dev = "cuda:0" 
@@ -83,11 +88,6 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio):
             geom_target = geom_target.voxel_down_sample(voxel_size=voxel_size)
             source = geom_source.voxel_down_sample(voxel_size=voxel_size)
 
-            dists = geom_source.compute_point_cloud_distance(geom_target)
-            dists = np.asarray(dists)
-            
-            ind = np.where(dists <= voxel_size)[0]
-            similar_points = geom_source.select_by_index(ind)
             # ICP only test
             init_guess = np.identity(4)
             result = fine_tuner.refine_registration(source,
@@ -144,17 +144,18 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio):
             else:
                 print("This is a newly constructed building!")
             print("Similarity ratio is : ", "{:.2f}".format(ratio),"%")
-            '''
-            vis_source = o3d.geometry.PointCloud()
-            vis_source.points = geom_source.points
-            vis_source.paint_uniform_color(np.array([1, 0, 0]))
-
-            vis_target = o3d.geometry.PointCloud()
-            vis_target.points = geom_target.points
-            vis_target.paint_uniform_color(np.array([0, 1, 0]))
             
-            o3d.visualization.draw_geometries([vis_target, vis_source, pcd_result])
-            '''
+            if (visualize): 
+                vis_source = o3d.geometry.PointCloud()
+                vis_source.points = geom_source.points
+                vis_source.paint_uniform_color(np.array([1, 0, 0]))
+
+                vis_target = o3d.geometry.PointCloud()
+                vis_target.points = geom_target.points
+                vis_target.paint_uniform_color(np.array([0, 1, 0]))
+                
+                o3d.visualization.draw_geometries([vis_target, vis_source, pcd_result])
+            
         except Exception:
             pass
 if __name__ == "__main__":
