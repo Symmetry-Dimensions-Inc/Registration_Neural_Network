@@ -53,7 +53,7 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
 
     dir_path = '/mnt/ssd1n1/Data/Point_clouds/BLUE'
     num_files = len([entry for entry in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, entry))])
-
+    accuracy = 0
     for i in range(num_files):
         try:
             source_dir = "/mnt/ssd1n1/Data/Point_clouds/BLUE/building_" + str(i) + "_points.las"
@@ -86,8 +86,11 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
             # Downsample
             geom_source= geom_source.voxel_down_sample(voxel_size=voxel_size)
             geom_target = geom_target.voxel_down_sample(voxel_size=voxel_size)
-            source = geom_source.voxel_down_sample(voxel_size=voxel_size)
-
+            geom_source, _ = geom_source.remove_radius_outlier(nb_points=5, radius=voxel_size*10)
+            
+            source = o3d.geometry.PointCloud()
+            source.points = geom_source.points
+            source.colors = geom_source.colors                     
             # ICP only test
             init_guess = np.identity(4)
             result = fine_tuner.refine_registration(source,
@@ -96,8 +99,7 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
                                                     distance_threshold=voxel_size*5)
 
             source.transform(result)
-            dists = source.compute_point_cloud_distance(geom_target)
-            dists = np.asarray(dists)
+            dists = np.asarray(source.compute_point_cloud_distance(geom_target))
             
             ind = np.where(dists <= voxel_size)[0]
             similar_points = source.select_by_index(ind)
@@ -130,8 +132,7 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
             pcd_result.paint_uniform_color(np.array([0, 0, 1]))
             
 
-            dists = pcd_result.compute_point_cloud_distance(geom_target)
-            dists = np.asarray(dists)
+            dists = np.asarray(pcd_result.compute_point_cloud_distance(geom_target))
             
             ind = np.where(dists <= voxel_size)[0]
             similar_points = pcd_result.select_by_index(ind)
@@ -143,6 +144,7 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
                 print("This building is updated!")
             else:
                 print("This is a newly constructed building!")
+                accuracy += 1
             print("Similarity ratio is : ", "{:.2f}".format(ratio),"%")
             
             if (visualize): 
@@ -154,9 +156,15 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
                 vis_target.points = geom_target.points
                 vis_target.paint_uniform_color(np.array([0, 1, 0]))
                 
+                if dcpcr_similarity < icp_similarity:
+                    pcd_result.points = source.points
+
                 o3d.visualization.draw_geometries([vis_target, vis_source, pcd_result])
-            
+                
         except Exception:
             pass
+            
+    print("Blue buildings accuracy is : ", ((num_files - accuracy)/num_files)*100, "%")
+
 if __name__ == "__main__":
     main()
