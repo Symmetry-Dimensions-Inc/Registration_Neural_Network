@@ -2,6 +2,7 @@ import open3d as o3d
 import laspy as lp
 import click
 import os
+import pandas as pd
 import numpy as np
 import torch
 import dcpcr.models.models as models
@@ -54,6 +55,7 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
     dir_path = '/mnt/ssd1n1/Data/Point_clouds/BLUE'
     num_files = len([entry for entry in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, entry))])
     accuracy = 0
+    ground_truth, predictions, building_id = [], [], []
     for i in range(num_files):
         try:
             source_dir = "/mnt/ssd1n1/Data/Point_clouds/BLUE/building_" + str(i) + "_points.las"
@@ -142,10 +144,14 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
             
             if ratio >= similarity_ratio:
                 print("This building is updated!")
+                predictions.append("Modified")
             else:
                 print("This is a newly constructed building!")
+                predictions.append("Reconstructed")
                 accuracy += 1
             print("Similarity ratio is : ", "{:.2f}".format(ratio),"%")
+            ground_truth.append("Reconstructed")
+            building_id.append("Building_"+ str(i))
             
             if (visualize): 
                 vis_source = o3d.geometry.PointCloud()
@@ -165,6 +171,28 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
             pass
             
     print("Blue buildings accuracy is : ", ((num_files - accuracy)/num_files)*100, "%")
+    df = pd.DataFrame({
+    'Building ID':   building_id,
+    'Prediction': predictions,
+    'Ground truth': ground_truth})
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    writer = pd.ExcelWriter('results.xlsx', engine='xlsxwriter')
+    # Write the dataframe data to XlsxWriter. Turn off the default header and
+    # index and skip one row to allow us to insert a user defined header.
+    df.to_excel(writer, sheet_name='Sheet1', startrow=1, header=False, index=False)
+    # Get the xlsxwriter workbook and worksheet objects.
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+    # Get the dimensions of the dataframe.
+    (max_row, max_col) = df.shape
+    # Create a list of column headers, to use in add_table().
+    column_settings = [{'header': column} for column in df.columns]
+    # Add the Excel table structure. Pandas will add the data.
+    worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings})
+    # Make the columns wider for clarity.
+    worksheet.set_column(0, max_col - 1, 12)
+    # Close the Pandas Excel writer and output the Excel file.
+    writer.close()
 
 if __name__ == "__main__":
     main()
