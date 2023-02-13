@@ -36,8 +36,13 @@ from dcpcr.utils import fine_tuner
               type=bool,
               help='Whether to visualize the aligned pointcloud.',
               default=False)
+@click.option('--building',
+              '-b',
+              type=str,
+              help='Define the ground truth green or blue',
+              default='blue')
 
-def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
+def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize, building):
     # Check device
     if torch.cuda.is_available(): 
         dev = "cuda:0" 
@@ -52,14 +57,14 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
     
     model = model.eval()
 
-    dir_path = '/mnt/ssd1n1/Data/Point_clouds/BLUE'
+    dir_path = '/mnt/ssd1n1/Data/Point_clouds/' + building.upper()
     num_files = len([entry for entry in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, entry))])
     accuracy = 0
     ground_truth, predictions, building_id = [], [], []
     for i in range(num_files):
         try:
-            source_dir = "/mnt/ssd1n1/Data/Point_clouds/BLUE/building_" + str(i) + "_points.las"
-            target_dir = "/mnt/ssd1n1/Data/LOD2/BLUE/Point_clouds/building_"+ str(i) + ".las"
+            source_dir = "/mnt/ssd1n1/Data/Point_clouds/" + building.upper() +"/building_" + str(i) + "_points.las"
+            target_dir = "/mnt/ssd1n1/Data/LOD2/" + building.upper() +"/Point_clouds/building_"+ str(i) + ".las"
             laz_source = lp.read(source_dir)
             laz_target = lp.read(target_dir)
 
@@ -148,9 +153,11 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
             else:
                 print("This is a newly constructed building!")
                 predictions.append("Reconstructed")
-                accuracy += 1
             print("Similarity ratio is : ", "{:.2f}".format(ratio),"%")
-            ground_truth.append("Reconstructed")
+            if building.lower() == "blue":
+                ground_truth.append("Modified")
+            else:
+                ground_truth.append("Reconstructed")
             building_id.append("Building_"+ str(i))
             
             if (visualize): 
@@ -170,7 +177,6 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize):
         except Exception:
             pass
             
-    print("Blue buildings accuracy is : ", ((num_files - accuracy)/num_files)*100, "%")
     df = pd.DataFrame({
     'Building ID':   building_id,
     'Prediction': predictions,

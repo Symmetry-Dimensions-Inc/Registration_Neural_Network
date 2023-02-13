@@ -11,3 +11,4 @@ matplotlib==3.4.2
 Click==7.0
 PyYAML==6.0
 laspy==2.3.0
+xlsxwriter
