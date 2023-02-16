@@ -31,6 +31,11 @@ from dcpcr.utils import fine_tuner
               type=float,
               help='ratio to define the similarity between two buildings',
               default=50)
+@click.option('--point_threshold',
+              '-t',
+              type=int,
+              help='minimun number of points per scan under which the building is considerated as destructed',
+              default=20)
 @click.option('--visualize',
               '-vis',
               type=bool,
@@ -39,10 +44,10 @@ from dcpcr.utils import fine_tuner
 @click.option('--building',
               '-b',
               type=str,
-              help='Define the ground truth green or blue',
-              default='blue')
-
-def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize, building):
+              help='Define the ground truth green or blue.',
+              default='blue') 
+            
+def main(checkpoint, fine_tune, voxel_size, similarity_ratio, point_threshold, visualize, building):
     # Check device
     if torch.cuda.is_available(): 
         dev = "cuda:0" 
@@ -57,16 +62,32 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize, buildin
     
     model = model.eval()
 
-    dir_path = '/mnt/ssd1n1/Data/Point_clouds/' + building.upper()
-    num_files = len([entry for entry in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, entry))])
-    accuracy = 0
+    dir_path = '/mnt/ssd1n1/data/newpcd/'+building.upper()
+
     ground_truth, predictions, building_id = [], [], []
-    for i in range(num_files):
+
+    if building.upper() == "BLUE":
+        gt = "Modified"
+    elif building.upper() == "GREEN":
+        gt = "Reconstructed"
+    elif building.upper() == "YELLOW":
+        gt = "Newly Constructed"
+    else:
+        gt = "Destructed"
+    
+    for i, file in enumerate(os.listdir(dir_path)):
         try:
-            source_dir = "/mnt/ssd1n1/Data/Point_clouds/" + building.upper() +"/building_" + str(i) + "_points.las"
-            target_dir = "/mnt/ssd1n1/Data/LOD2/" + building.upper() +"/Point_clouds/building_"+ str(i) + ".las"
+            source_dir = "/mnt/ssd1n1/data/newpcd/" + building.upper() + "/" + file
+            target_dir = "/mnt/ssd1n1/data/LOD2/" + building.upper() + "/Newpcd/"+ file
             laz_source = lp.read(source_dir)
-            laz_target = lp.read(target_dir)
+            try:
+                laz_target = lp.read(target_dir)
+            except Exception:
+                print("This is a newly constructed building!")
+                predictions.append("Newly constructed")
+                ground_truth.append(gt)
+                building_id.append(file[:len(file)-4])
+                continue
 
             source_scale = scaledLas(laz_source)
             points_source = np.vstack([laz_source.X, laz_source.Y, laz_source.Z]).transpose().astype(np.float32)
@@ -94,6 +115,13 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize, buildin
             geom_source= geom_source.voxel_down_sample(voxel_size=voxel_size)
             geom_target = geom_target.voxel_down_sample(voxel_size=voxel_size)
             geom_source, _ = geom_source.remove_radius_outlier(nb_points=5, radius=voxel_size*10)
+            
+            if (len(geom_source.points) < point_threshold):
+                print("This is a destructed building!")
+                predictions.append("Destructed")
+                ground_truth.append(gt)
+                building_id.append(file[:len(file)-4])
+                pass
             
             source = o3d.geometry.PointCloud()
             source.points = geom_source.points
@@ -151,15 +179,12 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize, buildin
                 print("This building is updated!")
                 predictions.append("Modified")
             else:
-                print("This is a newly constructed building!")
+                print("This is a reconstructed building!")
                 predictions.append("Reconstructed")
+                
             print("Similarity ratio is : ", "{:.2f}".format(ratio),"%")
-            if building.lower() == "blue":
-                ground_truth.append("Modified")
-            else:
-                ground_truth.append("Reconstructed")
-            building_id.append("Building_"+ str(i))
-            
+            ground_truth.append(gt)
+            building_id.append(file[:len(file)-4])
             if (visualize): 
                 vis_source = o3d.geometry.PointCloud()
                 vis_source.points = geom_source.points
@@ -181,24 +206,30 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, visualize, buildin
     'Building ID':   building_id,
     'Prediction': predictions,
     'Ground truth': ground_truth})
+
     # Create a Pandas Excel writer using XlsxWriter as the engine.
     writer = pd.ExcelWriter('results.xlsx', engine='xlsxwriter')
+
     # Write the dataframe data to XlsxWriter. Turn off the default header and
     # index and skip one row to allow us to insert a user defined header.
     df.to_excel(writer, sheet_name='Sheet1', startrow=1, header=False, index=False)
+
     # Get the xlsxwriter workbook and worksheet objects.
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
+
     # Get the dimensions of the dataframe.
     (max_row, max_col) = df.shape
+
     # Create a list of column headers, to use in add_table().
     column_settings = [{'header': column} for column in df.columns]
+
     # Add the Excel table structure. Pandas will add the data.
     worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings})
+
     # Make the columns wider for clarity.
     worksheet.set_column(0, max_col - 1, 12)
     # Close the Pandas Excel writer and output the Excel file.
     writer.close()
-
 if __name__ == "__main__":
     main()
