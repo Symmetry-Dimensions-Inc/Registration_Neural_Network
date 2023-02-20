@@ -4,6 +4,7 @@ The goal of this work is to report similarities between a source and a target po
 2. Reconstructed
 3. Newly constructed
 4. Destructed
+
 To do that, we will be using `pointcloud_similarity.py`. In this document we will be explaining the details about our script.
 
 ## How it works
