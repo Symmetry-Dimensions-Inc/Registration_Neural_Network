@@ -8,7 +8,7 @@ The goal of this work is to report similarities between a source and a target po
 To do that, we will be using `pointcloud_similarity.py`. In this document we will be explaining the details about our script.
 
 ## How it works
-Step 1:
+Steps:
 1. The scipts takes as input a set of source (scans) and target LOD2 pointclouds.
 2. For each {Source, Target} we perform a preprocessing phase which includes: normalization and subsampling using voxelization.
 3. For each {Source, Target} we perform parallarily GICP and [DCPCR](https://drive.google.com/file/d/1ka5awEEzqkGs9xQQ6SJW3ZFWdNAWJyWu/view) + GICP combined together.
