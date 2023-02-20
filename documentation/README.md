@@ -13,8 +13,8 @@ Step 1:
 3. For each {Source, Target} we perform parallarily GICP and [DCPCR](https://drive.google.com/file/d/1ka5awEEzqkGs9xQQ6SJW3ZFWdNAWJyWu/view) + GICP combined together.
 4. For each technique mentioned in step 4, we calculate the source to target similarity. The similarity is the ratio (%) of points from the source that are within a threshold euclidean distance from points from the target pointcloud.
 5. We get the transformation matrix that results in higher similarity between the two techniques in step 4
-6. We classify the {Source, Target} set according:
+6. We classify the {Source, Target} set accordingly:
 * If the LOD2 doesn't exist = Category 3: Building is newly constructed
 * If the source scan is empty (or too sparse) = Category 4: Building destructed
 * If similarity ratio between source and target is above 50% = Category 1: Building modified
-* If similarity ratio between source and target is below 50% = Category 1: Building reconstructed
+* If similarity ratio between source and target is below 50% = Category 2: Building reconstructed
