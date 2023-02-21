@@ -41,7 +41,7 @@ We report results on our sendai private data. The source data represent scans ta
 Results
 | Ground truth/Prediction | Blue       | Green       | Red       | Yellow       | Accuracy       |
 |----------|-------------|-------------|-------------|-------------|-------------|
-| Blue  | Terrain          | [200, 90, 0]    | brown       | 0 |
-| Green  | Building         | [255, 0, 0]     | red         | 0 |
-| Red  | UrbanAsset       | [255, 0, 255]   | pink        | 0 | 
-| Yellow  | Vegetation       | [0, 220, 0]     | green       | 0 |
+| Blue (16 scan)  | 11        | 4    | 1       | 0 | 68.75% |
+| Green (39 scan) | 0         | 36     | 3         | 0 | 92.3% |
+| Red  (65 scan) | 4       | 54   | 7        | 0 | 10.8% |
+| Yellow (30 scan) | 0       | 0    | 0       | 30 | 100% |
