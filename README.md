@@ -95,4 +95,4 @@ We recommand to use the pretrained [model](https://www.ipb.uni-bonn.de/html/proj
 Inference script can not be fully run inside a docker container (because of open3d visualization). If you would like to visualize the registration results these scripts should be outside of the docker container.
 
 ## Pointcloud similarity (building classification)
-`pointcloud_similarity.py` script is responsible for the building classification task. It relies on the DCPCR and GICP to perform this task. More details on how to run the code can be found [here](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/Feature/Pointcloud_similarity)
+`pointcloud_similarity.py` script is responsible for the building classification task. It relies on the DCPCR and GICP to perform this task. More details on how to run the code can be found [here](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/Feature/Pointcloud_similarity/documentation)
