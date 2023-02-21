@@ -32,7 +32,7 @@ The user has full control on the how to run the scripts using flags:
 
 To run the script, please copy the command bellow:
 ```
-python pointcloud_similarity.py [optional: add flags]
+python pointcloud_similarity.py -ckpt [path_to_checkpoint] [optional: add other flags]
 ```
 
 ## Results
