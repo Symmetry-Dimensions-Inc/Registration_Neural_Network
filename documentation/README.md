@@ -34,3 +34,14 @@ To run the script, please copy the command bellow:
 ```
 python pointcloud_similarity.py [optional: add flags]
 ```
+
+## Results
+We report results on our sendai private data. The source data represent scans taken for the building while the target is the pointcloud generated from LOD2. Data can be found [here](https://drive.google.com/drive/folders/1bphqSdg1_73WYpi0Pr1dDfn5TJdzIjM8).
+
+Results
+| Ground truth/Prediction | Blue       | Green       | Red       | Yellow       | Accuracy       |
+|----------|-------------|-------------|-------------|-------------|-------------|
+| Blue  | Terrain          | [200, 90, 0]    | brown       | 0 |
+| Green  | Building         | [255, 0, 0]     | red         | 0 |
+| Red  | UrbanAsset       | [255, 0, 255]   | pink        | 0 | 
+| Yellow  | Vegetation       | [0, 220, 0]     | green       | 0 |
