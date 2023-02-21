@@ -39,9 +39,9 @@ python pointcloud_similarity.py [optional: add flags]
 We report results on our sendai private data. The source data represent scans taken for the building while the target is the pointcloud generated from LOD2. Data can be found [here](https://drive.google.com/drive/folders/1bphqSdg1_73WYpi0Pr1dDfn5TJdzIjM8).
 
 Results
-| Ground truth/Prediction | Blue       | Green       | Red       | Yellow       | Accuracy       |
+| Ground truth/Prediction | Modified       | Reconstructed       | Destructed      | Newly constructed       | Accuracy       |
 |----------|-------------|-------------|-------------|-------------|-------------|
-| Blue (16 scan)  | 11        | 4    | 1       | 0 | 68.75% |
-| Green (39 scan) | 0         | 36     | 3         | 0 | 92.3% |
+| Modified (16 scan)  | 11        | 4    | 1       | 0 | 68.75% |
+| Reconstructed (39 scan) | 0         | 36     | 3         | 0 | 92.3% |
 | Red  (65 scan) | 4       | 54   | 7        | 0 | 10.8% |
-| Yellow (30 scan) | 0       | 0    | 0       | 30 | 100% |
+| Newly constructed (30 scan) | 0       | 0    | 0       | 30 | 100% |
