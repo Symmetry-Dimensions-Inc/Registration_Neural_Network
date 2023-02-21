@@ -43,5 +43,10 @@ Results
 |----------|-------------|-------------|-------------|-------------|-------------|
 | Modified (16 scan)  | 11        | 4    | 1       | 0 | 68.75% |
 | Reconstructed (39 scan) | 0         | 36     | 3         | 0 | 92.3% |
-| Red  (65 scan) | 4       | 54   | 7        | 0 | 10.8% |
+| Destructed  (65 scan) | 4       | 54   | 7        | 0 | 10.8% |
 | Newly constructed (30 scan) | 0       | 0    | 0       | 30 | 100% |
+
+## Visualization
+We can visualize the source to target alignment by setting `vis` flag to `True`. Visualization are done using open3d.
+
+![Project Image](../images/blue.png)
