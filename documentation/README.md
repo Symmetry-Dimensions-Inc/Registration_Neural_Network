@@ -48,5 +48,9 @@ Results
 
 ## Visualization
 We can visualize the source to target alignment by setting `vis` flag to `True`. Visualization are done using open3d.
+* Green points: target building pointcloud
+* Red points: source captured scan
+* Blue points: aligned source scan with the target building
 
+Below is an example of a captured scan of a modified building (category 1)
 ![Project Image](../images/blue.png)
