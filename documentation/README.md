@@ -15,7 +15,22 @@ Steps:
 4. For each technique mentioned in step 3, we allign the source to target and we calculate the similarity. The similarity is the ratio (%) of points from the source that are within a threshold euclidean distance from points from the target pointcloud.
 5. We get the transformation matrix that results in higher similarity between the two techniques in step 3
 6. We classify the {Source, Target} set accordingly:
-* If the LOD2 doesn't exist = Category 3: Building is newly constructed
-* If the source scan is empty (or too sparse) = Category 4: Building destructed
-* If similarity ratio between source and target is above 50% = Category 1: Building modified
-* If similarity ratio between source and target is below 50% = Category 2: Building reconstructed
+    * If the LOD2 doesn't exist = Category 3: Building is newly constructed
+    * If the source scan is empty (or too sparse) = Category 4: Building destructed
+    * If similarity ratio between source and target is above 50% = Category 1: Building modified
+    * If similarity ratio between source and target is below 50% = Category 2: Building reconstructed
+
+## How to run
+The user has full control on the how to run the scripts using flags:
+* `-ckpt`: path to checkpoint file (.ckpt) to resume training (default='model_paper.ckpt')
+* `-ft`: Whether to fine tune the dcpcr results with icp or not. (default=True)
+* `-vs`: voxel size for pointcloud downsampling. (default=0.03)
+* `-sr`: % ratio threshold to define the similarity between two buildings. (default=50)
+* `-t`: minimun number of points per scan under which the building is considerated as destructed. (default=20)
+* `-b`: Define the ground truth green, blue, red or yellow. (default='blue')
+* `vis`: Whether to visualize the aligned pointcloud. (default=False)
+
+To run the script, please copy the command bellow:
+```
+python pointcloud_similarity.py [optional: add flags]
+```
