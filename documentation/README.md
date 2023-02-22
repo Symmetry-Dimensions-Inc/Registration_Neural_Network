@@ -46,6 +46,13 @@ Results
 | Destructed  (65 scan) | 4       | 54   | 7        | 0 | 10.8% |
 | Newly constructed (30 scan) | 0       | 0    | 0       | 30 | 100% |
 
+### Results discussion
+* For modified and reconstructed buildings, we notice that the quality of the pointcloud may be poor for a number of scans. These scans may be empty which explains the prediction of destructed category instead.
+* It is very hard to differentiate between fully reconstructed and under reconstruction buildings.
+* For destructed building, some constructions have already started when the scans were captured. For our algorithm, these constructions are enough to deceive the model to predict a reconstructed category instead.
+* Our DCPCR currently works well for predicting initial pose guess. It can work better if we can include r,g,b colors for each point. (This requires also LOD2 to have colors as well)
+* Currently GICP + DCPCR gives the best pose estimation. However, We need to explore what other ICP methods we can use in the future.
+
 ## Visualization
 We can visualize the source to target alignment by setting `vis` flag to `True`. Visualization are done using open3d.
 * Green points: target building pointcloud
