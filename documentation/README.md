@@ -22,7 +22,7 @@ Steps:
 
 ## How to run
 The user has full control on the how to run the scripts using flags:
-* `-ckpt`: path to checkpoint file (.ckpt) to resume training (default='model_paper.ckpt')
+* `-ckpt`: path to pretrained checkpoint file (.ckpt) (default='model_paper.ckpt')
 * `-ft`: Whether to fine tune the dcpcr results with icp or not. (default=True)
 * `-vs`: voxel size for pointcloud downsampling. (default=0.03)
 * `-sr`: % ratio threshold to define the similarity between two buildings. (default=50)
