@@ -29,7 +29,8 @@ RUN pip3 install \
     Click==7.0 \
     setuptools==59.5.0 \
     PyYAML==6.0 \
-    laspy==2.3.0
+    laspy==2.3.0 \
+    xlsxwriter
 
 # RUN pip3 install \
 #     torch==1.10.1+cu102 \
