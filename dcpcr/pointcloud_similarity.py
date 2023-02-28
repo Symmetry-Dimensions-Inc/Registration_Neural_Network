@@ -1,7 +1,9 @@
 import open3d as o3d
 import laspy as lp
 import click
-import os
+from os import listdir
+from os.path import join, dirname, abspath
+import yaml
 import pandas as pd
 import numpy as np
 import torch
@@ -11,11 +13,11 @@ from dcpcr.utils import fine_tuner
 
 @click.command()
 # Add your options here
-@click.option('--checkpoint',
-              '-ckpt',
+@click.option('--config',
+              '-c',
               type=str,
-              help='path to checkpoint file (.ckpt) to resume training.',
-              default='model_paper.ckpt')
+              help='path to the config file (.yaml)',
+              default=join(dirname(abspath(__file__)), 'config/pointcloud_similarity.yaml'))
 @click.option('--fine_tune',
               '-ft',
               type=bool,
@@ -47,22 +49,20 @@ from dcpcr.utils import fine_tuner
               help='Define the ground truth green or blue.',
               default='blue') 
             
-def main(checkpoint, fine_tune, voxel_size, similarity_ratio, point_threshold, visualize, building):
+def main(config, fine_tune, voxel_size, similarity_ratio, point_threshold, visualize, building):
     # Check device
     if torch.cuda.is_available(): 
         dev = "cuda:0" 
     else: 
         dev = "cpu"
-    
-    cfg = torch.load(checkpoint)['hyper_parameters']
-    cfg['checkpoint'] = checkpoint
+    path = yaml.safe_load(open(config))
 
     model = models.DCPCR.load_from_checkpoint(
-        checkpoint).to(dev)
+        path['checkpoint']).to(dev)
     
     model = model.eval()
 
-    dir_path = '/mnt/ssd1n1/data/newpcd/'+building.upper()
+    dir_path = path['pcd_path'] + building.upper()
 
     ground_truth, predictions, building_id = [], [], []
 
@@ -75,10 +75,12 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, point_threshold, v
     else:
         gt = "Destructed"
     
-    for i, file in enumerate(os.listdir(dir_path)):
+    for i, file in enumerate(listdir(dir_path)):
         try:
-            source_dir = "/mnt/ssd1n1/data/newpcd/" + building.upper() + "/" + file
-            target_dir = "/mnt/ssd1n1/data/LOD2/" + building.upper() + "/Newpcd/"+ file
+            if i == 0:
+                continue
+            source_dir = path['pcd_path'] + building.upper() + "/" + file
+            target_dir = path['lod2_path'] + building.upper() + "/Newpcd/"+ file
             laz_source = lp.read(source_dir)
             try:
                 laz_target = lp.read(target_dir)
@@ -208,7 +210,7 @@ def main(checkpoint, fine_tune, voxel_size, similarity_ratio, point_threshold, v
     'Ground truth': ground_truth})
 
     # Create a Pandas Excel writer using XlsxWriter as the engine.
-    writer = pd.ExcelWriter('results.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter(gt + '_results.xlsx', engine='xlsxwriter')
 
     # Write the dataframe data to XlsxWriter. Turn off the default header and
     # index and skip one row to allow us to insert a user defined header.
