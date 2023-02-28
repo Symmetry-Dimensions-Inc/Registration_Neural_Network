@@ -22,7 +22,7 @@ Steps:
 
 ## How to run
 The user has full control on the how to run the scripts using flags:
-* `-ckpt`: path to pretrained checkpoint file (.ckpt) (default='model_paper.ckpt')
+* `-c`: path to config yaml file (default: 'config/pointcloud_similarity.yaml')
 * `-ft`: Whether to fine tune the dcpcr results with icp or not. (default=True)
 * `-vs`: voxel size for pointcloud downsampling. (default=0.03)
 * `-sr`: % ratio threshold to define the similarity between two buildings. (default=50)
@@ -30,9 +30,13 @@ The user has full control on the how to run the scripts using flags:
 * `-b`: Define the ground truth green, blue, red or yellow. (default='blue')
 * `vis`: Whether to visualize the aligned pointcloud. (default=False)
 
+Please update `config/pointcloud_similarity.yaml` with the correct paths:
+* `checkpoint`: Path to [pretrained](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) checkpoint file (.ckpt)
+* `lod2_path`: Path to LOD2 data folder
+* `pcd_path`: Path to pointcloud data folder
 To run the script, please copy the command bellow:
 ```
-python pointcloud_similarity.py -ckpt [path_to_checkpoint] [optional: add other flags]
+python pointcloud_similarity.py -c [path_to_configfile] [optional: add other flags]
 ```
 
 ## Results
