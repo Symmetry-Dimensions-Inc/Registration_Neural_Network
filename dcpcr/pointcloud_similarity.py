@@ -4,11 +4,10 @@ import click
 from os import listdir
 from os.path import join, dirname, abspath
 import yaml
-import pandas as pd
 import numpy as np
 import torch
 import dcpcr.models.models as models
-from dcpcr.utils.utils import extractPc, transform, normalizePc, scaledLas
+from dcpcr.utils.utils import extractPc, transform, normalizePc, scaledLas, storeCsv
 from dcpcr.utils import fine_tuner
 
 @click.command()
@@ -77,8 +76,6 @@ def main(config, fine_tune, voxel_size, similarity_ratio, point_threshold, visua
     
     for i, file in enumerate(listdir(dir_path)):
         try:
-            if i == 0:
-                continue
             source_dir = path['pcd_path'] + building.upper() + "/" + file
             target_dir = path['lod2_path'] + building.upper() + "/Newpcd/"+ file
             laz_source = lp.read(source_dir)
@@ -204,34 +201,7 @@ def main(config, fine_tune, voxel_size, similarity_ratio, point_threshold, visua
         except Exception:
             pass
             
-    df = pd.DataFrame({
-    'Building ID':   building_id,
-    'Prediction': predictions,
-    'Ground truth': ground_truth})
-
-    # Create a Pandas Excel writer using XlsxWriter as the engine.
-    writer = pd.ExcelWriter(gt + '_results.xlsx', engine='xlsxwriter')
-
-    # Write the dataframe data to XlsxWriter. Turn off the default header and
-    # index and skip one row to allow us to insert a user defined header.
-    df.to_excel(writer, sheet_name='Sheet1', startrow=1, header=False, index=False)
-
-    # Get the xlsxwriter workbook and worksheet objects.
-    workbook = writer.book
-    worksheet = writer.sheets['Sheet1']
-
-    # Get the dimensions of the dataframe.
-    (max_row, max_col) = df.shape
-
-    # Create a list of column headers, to use in add_table().
-    column_settings = [{'header': column} for column in df.columns]
-
-    # Add the Excel table structure. Pandas will add the data.
-    worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings})
-
-    # Make the columns wider for clarity.
-    worksheet.set_column(0, max_col - 1, 12)
-    # Close the Pandas Excel writer and output the Excel file.
-    writer.close()
+    storeCsv(building_id, predictions, ground_truth, gt + '_results.xlsx')
+   
 if __name__ == "__main__":
     main()
