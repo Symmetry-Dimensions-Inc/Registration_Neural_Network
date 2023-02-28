@@ -11,7 +11,7 @@ To do that, we will be using `pointcloud_similarity.py`. In this document we wil
 Steps:
 1. The scipts takes as input a set of source (scans) and target LOD2 pointclouds.
 2. For each {Source, Target} we perform a preprocessing phase which includes: normalization and subsampling using voxelization.
-3. For each {Source, Target} we perform parallarily GICP and [DCPCR](https://drive.google.com/file/d/1ka5awEEzqkGs9xQQ6SJW3ZFWdNAWJyWu/view) + GICP combined together.
+3. For each {Source, Target} we perform parallarily GICP and [DCPCR](https://drive.google.com/file/d/1-91ym2ue35wtUK1WhG1rwxbdZrSa2Gow/view) + GICP combined together.
 4. For each technique mentioned in step 3, we allign the source to target and we calculate the similarity. The similarity is the ratio (%) of points from the source that are within a threshold euclidean distance from points from the target pointcloud.
 5. We get the transformation matrix that results in higher similarity between the two techniques in step 3
 6. We classify the {Source, Target} set accordingly:
