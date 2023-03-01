@@ -1,6 +1,7 @@
 import os
 import torch
 import numpy as np
+import pandas as pd
 from scipy.spatial.transform import Rotation
 import open3d as o3d
 
@@ -110,12 +111,12 @@ def torch2o3d(pcd, colors=None, estimate_normals=False):
     return pcl
 
 def normalizePc(points):
+    if points.size != 0:    
         centroid = np.mean(points, axis=0)
         points -= centroid
         furthest_distance = np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
         points /= furthest_distance
-
-        return points
+    return points
 
 def extractPc(pcd, normalize=False):
     # Extract the xyzrgb points from pcd
@@ -157,3 +158,34 @@ def scaledLas(las_file):
     las_file.Y = (y_dimension * y_scale) + y_offset
     las_file.Z = (z_dimension * z_scale) + z_offset
     return x_scale
+
+def storeCsv(building_id, predictions, ground_truth, file_name):
+    df = pd.DataFrame({
+    'Building ID':   building_id,
+    'Prediction': predictions,
+    'Ground truth': ground_truth})
+
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+
+    # Write the dataframe data to XlsxWriter. Turn off the default header and
+    # index and skip one row to allow us to insert a user defined header.
+    df.to_excel(writer, sheet_name='Sheet1', startrow=1, header=False, index=False)
+
+    # Get the xlsxwriter workbook and worksheet objects.
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+
+    # Get the dimensions of the dataframe.
+    (max_row, max_col) = df.shape
+
+    # Create a list of column headers, to use in add_table().
+    column_settings = [{'header': column} for column in df.columns]
+
+    # Add the Excel table structure. Pandas will add the data.
+    worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings})
+
+    # Make the columns wider for clarity.
+    worksheet.set_column(0, max_col - 1, 12)
+    # Close the Pandas Excel writer and output the Excel file.
+    writer.close()
