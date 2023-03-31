@@ -95,3 +95,14 @@ python las_inference.py -ckpt [path_to_checkpoint] [optional] -ft False
 
 ## ポイントクラウドの類似性（建物分類）
 `pointcloud_similarity.py` スクリプトは、建物分類タスクを担当しています。このタスクを実行するために、DCPCRとGICPに依存しています。コードの実行方法に関する詳細は、[このリンク](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/main/documentation)で見つけることができます。
+
+## ライセンス
+* 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/site-policy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。
+
+## 注意事項
+* 本レポジトリは参考資料として提供しているものです。動作保証は行っておりません。
+* 予告なく変更・削除する可能性があります。
+* 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
+
+## 参考資料
+* （近日公開）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
