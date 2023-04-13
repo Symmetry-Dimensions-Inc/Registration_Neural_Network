@@ -35,4 +35,4 @@ More details about flags will be explained later.
 The pretrained weights of our models can be found [here](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt)
 
 ## Pointcloud similarity (building classification)
-`pointcloud_similarity.py` script is responsible for the building classification task. It relies on the DCPCR and GICP to perform this task. More details on how to run the code can be found [in this link](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/main/documentation)
+`pointcloud_similarity.py` script is responsible for the building classification task. It relies on the DCPCR and GICP to perform this task. More details on how to run the code can be found [in this link](./documentation/README.md)
