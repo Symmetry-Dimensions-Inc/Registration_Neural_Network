@@ -42,10 +42,10 @@ python pointcloud_similarity.py -c [path_to_configfile] [optional: add other fla
 ## Data
 Data can be found [here](https://drive.google.com/drive/folders/1bphqSdg1_73WYpi0Pr1dDfn5TJdzIjM8). It is composed of two folders:
 
-* `LOD2` folder: Containing the ground truth LOD2 to pointcloud transformed point cloud (target).
+* `LOD2` folder: Containing the ground truth LOD2 to point cloud (target).
 * `Newpcd` folder: Containing the LiDAR captured point cloud (source).
 
-Each of these folders contains `Red`, `Green`, `Blue` and `Yellow` subforlders.
+Each of these folders contains `Blue`, `Green`, `Red` and `Yellow` subforlders.
 * `Blue`: Contains building data that are **Modified**
 * `Green`: Contains building data that are **Reconstructed**
 * `Red`: Contains building data that are **Destructed**
