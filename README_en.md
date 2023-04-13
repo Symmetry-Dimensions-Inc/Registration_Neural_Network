@@ -7,7 +7,9 @@ This work has been tested on Ubuntu using RTX 3060 GPU.
 ### Installation
 
 Use `pip3 install -e .` to install dcpcr. All the dependencies can be found inside `requirements.txt` file.
+
 The script can be simply run. Only the `dcpcr/config/pointcloud_similarity.yaml` might need to be updated according to data and model path.
+
 More information about our data can be found later.
 
 ## Running the Code
@@ -26,6 +28,7 @@ More details about flags will be explained later.
 ### Qualitative results
 
 `pointcloud_similarity.py` will automatically store results in CSV format. The results will be reported in the below order:
+
 | Building ID | Prediction      | Ground Truth       |
 ### Pretrained models
 
