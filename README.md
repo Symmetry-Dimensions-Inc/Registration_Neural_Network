@@ -1,98 +1,130 @@
-# DCPCR
-DCPCR: Deep Compressed Point Cloud Registration in Large-Scale Outdoor Environments
-This work has been tested on Ubuntu using RTX 3060 GPU.
-## How to get started (with docker)
+# DCPCR　(更新箇所特定モジュール)
+DCPCR: 大規模屋外環境におけるディープ圧縮ポイントクラウド登録
+この作業は、Ubuntuを使用して、RTX 3060 GPUでテストされています。
 
-Install nvida-docker.
+## 概要
+公共交通のバスやタクシー等のモビリティに搭載されたLiDAR等で定常的に取得される点群データや、スマートフォン等で市民が日常的に取得できるデータを活用して、3D都市モデルのデータソースを取得。これに基づきアラインメント・更新箇所検出を行うA.I.モデルを及び3D都市モデルを生成する自動モデリングツールの使用方法を記載したものです。
 
-## Data
+## モジュール構成
+今回、実証開発した3D都市モデル自動生成システムは、大きく4つのモジュールを6つのステップで動作させるものです。
+構成モジュールは次の通りです。
+* A. 点群アラインメント
+* B. LOD2モデルに基づいた点群分割アルゴリズム
+* C. メッシュ化
+* D. 更新箇所検出 (別リポジトリ)
 
-You can download the compressed apollo dataset from [here](https://www.ipb.uni-bonn.de/html/projects/dcpcr/apollo-compressed.zip) and link the dataset to the docker container by configuring the Makefile `/dcpcr/Makefile`
+これらのモジュールは、次のステップで実行されます。
+
+1. 建物のフットプリントを作成する (モジュールB)
+2. フットプリントポリゴンの拡張 (モジュールB)
+3. 建物の抽出とデータのアラインメント (モジュールA)
+4. LiDAR データと LOD2 データの結合 (モジュールA)
+5. 更新箇所検出（モジュールD）
+6. iPSR アルゴリズムを使用してメッシュを作成する (モジュールC)
+
+このリポジトリではD. 更新箇所検出のモジュールのみを公開しており、その他のモジュールについては別のリポジトリとなります。
+
+## はじめに（Dockerを使った場合）
+
+nvidia-dockerをインストールしてください。
+
+## データ
+
+圧縮されたapolloデータセットを[ここ](https://www.ipb.uni-bonn.de/html/projects/dcpcr/apollo-compressed.zip)からダウンロードして、`/dcpcr/Makefile` を設定することで、データセットをDockerコンテナにリンクさせてください。
 
 ```sh
 DATA=<path-to-your-data>
 ```
 
-For visualization and finetuning on the uncompressed data, you first have to download the apollo data and use the script '/dcpcr/scripts/apollo_aggregation.py' to compute the dense point clouds. This requires around 500 GB, see compression is nice ;)
-You can also visualize the registration on the compressed data, but it's hard to see stuff, due to the low resolution.
+視覚化と非圧縮データの微調整には、まずapolloデータをダウンロードし、 `/dcpcr/scripts/apollo_aggregation.py` スクリプトを使って密なポイントクラウドを計算する必要があります。これには約500 GBが必要です。圧縮データ上の登録を視覚化することもできますが、低解像度のため、見づらいです。
 
-## Building the docker container
+## Dockerコンテナのビルド
 
-For building the Docker Container simply run
+ルートディレクトリで以下を実行して、Dockerコンテナをビルドします。
 
 ```sh
 make build
 ```
 
-in the root directory.
+## コードの実行
 
-## Running the Code
-
-The first step is to run the docker container inside `dcpcr/`:
+最初のステップは、`dcpcr/`の中でDockerコンテナを実行することです。
 
 ```sh
 make run
 ```
-In case running docker container results in the following error (due to --gpu flag):
-**docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]].**
-A solution to that can be found [here](https://askubuntu.com/questions/1400476/docker-error-response-from-daemon-could-not-select-device-driver-with-capab).
+もし、Dockerコンテナの実行が次のエラーで失敗した場合（--gpuフラグのため）:
+> docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]].
 
-The following commands assume to be run inside the docker container.
+[ここ](https://askubuntu.com/questions/1400476/docker-error-response-from-daemon-could-not-select-device-driver-with-capab)で解決策が見つかります。
 
-### Training
+以下のコマンドは、Dockerコンテナ内で実行することを想定しています。
 
-For training a network we first have to create the config file with all the parameters.
-An example of this can be found in `/dcpcr/config/config.yaml`.
-To train the network simply run
+### トレーニング
+
+ネットワークをトレーニングするには、まずすべてのパラメータを含む設定ファイルを作成する必要があります。  
+設定ファイルのサンプルは `/dcpcr/config/config.yaml` にあります。
+ネットワークをトレーニングするには、以下を実行してください。
 
 ```sh
 python3 trainer -c <path-to-your-config>
 ```
 
-### Evaluation
+### 評価
 
-Evaluating the network on the test set can be done by:
+テストセットでのネットワークの評価は、以下のように行います。
 
 ```sh
 python3 test.py -ckpt <path-to-your-checkpoint>
 ```
 
-All results will be saved in a dictonary in the `dcpcr/experiments`. When finetuning with the compressed data we used `-dt 1`, while `-dt 5` for the uncompressed.
+すべての結果は、`dcpcr/experiments` のディレクトリに保存されます。圧縮データで微調整するときには `-dt 1` を使用し、非圧縮データの場合は `-dt 5` を使用しました。
 
-### Qualitative results
+### 定性的な結果
 
-In `dcpcr/scripts/qualitative` are some scripts to visualize the results.
+`dcpcr/scripts/qualitative` には、結果を視覚化するスクリプトがいくつかあります。
 
-### Pretrained models
+### 事前学習済みモデル
 
-The pretrained weights of our models can be found [here](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt)
+モデルの事前学習済みの重みは、[ここ](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) で見つけることができます。
 
-## How to get started (without Docker)
+## はじめに（Dockerを使わない場合）
 
-### Installation
+### インストール
 
-A list of all dependencies and install instructions can be derived from the Dockerfile.
-Use `pip3 install -e .` to install dcpcr.
+すべての依存関係とインストール手順は、Dockerfileから導出することができます。
+`pip3 install -e .` を使用して、dcpcrをインストールしてください。
 
-### Running the code
+### コードの実行
 
-The scripts can be run as before inside the docker container. Only the `dcpcr/config/data_config.yaml` might need to be updated.
+スクリプトは、以前と同様にDockerコンテナ内で実行することができます。ただし、`dcpcr/config/data_config.yaml` を更新する必要があるかもしれません。
 
-## Inference on other pointcloud data
+## 他のポイントクラウドデータでの推論
 
-To test the model on data other that Apollo. You can run the following scripts.
+Apollo以外のデータでモデルをテストするには、以下のスクリプトを実行できます。
 
-If the data is in `.pcd` format:
+データが `.pcd` 形式の場合：
 ```sh
 python inference.py -ckpt [path_to_checkpoint] [optional] -ft False
 ```
-If the data is in `.las` format:
+データが `.las` 形式の場合：
 ```sh
 python las_inference.py -ckpt [path_to_checkpoint] [optional] -ft False
 ```
-We recommand to use the pretrained [model](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) for inference.
+推論には、事前学習済みの[モデル](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt)を使用することをお勧めします。
 
-Inference script can not be fully run inside a docker container (because of open3d visualization). If you would like to visualize the registration results these scripts should be outside of the docker container.
+推論スクリプトは、Dockerコンテナ内で完全には実行できません（open3dの視覚化のため）。登録結果を視覚化したい場合は、これらのスクリプトはDockerコンテナの外で実行する必要があります。
 
-## Pointcloud similarity (building classification)
-`pointcloud_similarity.py` script is responsible for the building classification task. It relies on the DCPCR and GICP to perform this task. More details on how to run the code can be found [here](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/main/documentation)
+## ポイントクラウドの類似性（建物分類）
+`pointcloud_similarity.py` スクリプトは、建物分類タスクを担当しています。このタスクを実行するために、DCPCRとGICPに依存しています。コードの実行方法に関する詳細は、[このリンク](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/main/documentation)で見つけることができます。
+
+## ライセンス
+* 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/site-policy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。
+
+## 注意事項
+* 本レポジトリは参考資料として提供しているものです。動作保証は行っておりません。
+* 予告なく変更・削除する可能性があります。
+* 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
+
+## 参考資料
+* （近日公開）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
