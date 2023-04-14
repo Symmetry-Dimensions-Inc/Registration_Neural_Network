@@ -116,7 +116,7 @@ python las_inference.py -ckpt [path_to_checkpoint] [optional] -ft False
 推論スクリプトは、Dockerコンテナ内で完全には実行できません（open3dの視覚化のため）。登録結果を視覚化したい場合は、これらのスクリプトはDockerコンテナの外で実行する必要があります。
 
 ## ポイントクラウドの類似性（建物分類）
-`pointcloud_similarity.py` スクリプトは、建物分類タスクを担当しています。このタスクを実行するために、DCPCRとGICPに依存しています。コードの実行方法に関する詳細は、[このリンク](https://github.com/Symmetry-Dimensions-Inc/Registration_Neural_Network/tree/main/documentation)で見つけることができます。
+`pointcloud_similarity.py` スクリプトは、建物分類タスクを担当しています。このタスクを実行するために、DCPCRとGICPに依存しています。コードの実行方法に関する詳細は、[このリンク](./documentation/README.md)で見つけることができます。
 
 ## ライセンス
 * 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/site-policy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。

@@ -39,8 +39,22 @@ To run the script, please copy the command bellow:
 python pointcloud_similarity.py -c [path_to_configfile] [optional: add other flags]
 ```
 
+## Data
+Data can be found [here](https://drive.google.com/drive/folders/1bphqSdg1_73WYpi0Pr1dDfn5TJdzIjM8). It is composed of two folders:
+
+* `LOD2` folder: Containing the ground truth LOD2 to point cloud (target).
+* `Newpcd` folder: Containing the LiDAR captured point cloud (source).
+
+Each of these folders contains `Blue`, `Green`, `Red` and `Yellow` subfolders.
+* `Blue`: Contains building data that are **Modified**
+* `Green`: Contains building data that are **Reconstructed**
+* `Red`: Contains building data that are **Destructed**
+* `Yellow`: Contains building data that are **Newly Constructed**
+
+Since the newly constructed buildings can not be found within our LOD2 database, `LOD2` folder does not contain a `Yellow` subfolder.
+
 ## Results
-We report results on our sendai private data. The source data represent scans taken for the building while the target is the pointcloud generated from LOD2. Data can be found [here](https://drive.google.com/drive/folders/1bphqSdg1_73WYpi0Pr1dDfn5TJdzIjM8).
+We report results on our sendai private data. The source data represent scans taken for the building while the target is the pointcloud generated from LOD2.
 
 Results
 | Ground truth/Prediction | Modified       | Reconstructed       | Destructed      | Newly constructed       | Accuracy       |
