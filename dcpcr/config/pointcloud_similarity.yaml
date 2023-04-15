@@ -1,5 +1,0 @@
-# Path to DCPCR pretrained model
-checkpoint: '../../../DCPCR/dcpcr/model_paper.ckpt'
-# Path to data
-lod2_path: '/home/ghailen/work/symmetry/DCPCR/dcpcr/20230207_building_changes_detection_data/20230207_building_changes_detection_data/data/LOD2/'
-pcd_path: '/home/ghailen/work/symmetry/DCPCR/dcpcr/20230207_building_changes_detection_data/20230207_building_changes_detection_data/data/newpcd/'

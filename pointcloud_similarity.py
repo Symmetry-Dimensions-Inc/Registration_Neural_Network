@@ -16,7 +16,7 @@ from dcpcr.utils import fine_tuner
               '-c',
               type=str,
               help='path to the config file (.yaml)',
-              default=join(dirname(abspath(__file__)), 'config/pointcloud_similarity.yaml'))
+              default=join(dirname(abspath(__file__)), 'pointcloud_similarity.yaml'))
 @click.option('--fine_tune',
               '-ft',
               type=bool,

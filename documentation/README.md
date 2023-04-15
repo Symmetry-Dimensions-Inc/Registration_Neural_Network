@@ -40,7 +40,7 @@ python pointcloud_similarity.py -c [path_to_configfile] [optional: add other fla
 ```
 
 ## Data
-Data can be found [here](https://drive.google.com/drive/folders/1bphqSdg1_73WYpi0Pr1dDfn5TJdzIjM8). It is composed of two folders:
+Data can be found [here](https://plateau-uc22-0053-data.s3.ap-northeast-1.amazonaws.com/20230207_building_changes_detection_data.zip). It is composed of two folders:
 
 * `LOD2` folder: Containing the ground truth LOD2 to point cloud (target).
 * `Newpcd` folder: Containing the LiDAR captured point cloud (source).
