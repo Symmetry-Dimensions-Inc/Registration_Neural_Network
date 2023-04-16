@@ -1,0 +1,5 @@
+# Path to DCPCR pretrained model
+checkpoint: './model_paper.ckpt'
+# Path to data
+lod2_path: './20230207_building_changes_detection_data/data/LOD2/'
+pcd_path: './20230207_building_changes_detection_data/data/newpcd/'

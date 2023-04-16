@@ -1,130 +1,102 @@
-# DCPCR　(更新箇所特定モジュール)
-DCPCR: 大規模屋外環境におけるディープ圧縮ポイントクラウド登録
-この作業は、Ubuntuを使用して、RTX 3060 GPUでテストされています。
+# FY2022 Project PLATEAU UC22-053「AIを用いた3D都市モデルの自動更新手法」の成果物（２）
 
-## 概要
-公共交通のバスやタクシー等のモビリティに搭載されたLiDAR等で定常的に取得される点群データや、スマートフォン等で市民が日常的に取得できるデータを活用して、3D都市モデルのデータソースを取得。これに基づきアラインメント・更新箇所検出を行うA.I.モデルを及び3D都市モデルを生成する自動モデリングツールの使用方法を記載したものです。
+## 1. 概要
+![Top Image](images/Top_Image.jpg)
 
-## モジュール構成
-今回、実証開発した3D都市モデル自動生成システムは、大きく4つのモジュールを6つのステップで動作させるものです。
-構成モジュールは次の通りです。
-* A. 点群アラインメント
-* B. LOD2モデルに基づいた点群分割アルゴリズム
-* C. メッシュ化
-* D. 更新箇所検出 (別リポジトリ)
+公共交通のバスやタクシー等のモビリティに搭載されたLiDAR等で定常的に取得される点群データや、スマートフォン等で市民が日常的に取得できるデータを活用して、3D都市モデルのデータソースを取得。これに基づき点群合成・更新箇所検出を行うA.I.モデルを及び3D都市モデルを生成する自動モデリングツールの使用方法を記載したものです。  
 
-これらのモジュールは、次のステップで実行されます。
+## 2. モジュール構成
+今回、実証開発した自動モデリングシステムは、大きく3つのモジュールからなり、6つのステップで処理を行ないます。
 
-1. 建物のフットプリントを作成する (モジュールB)
-2. フットプリントポリゴンの拡張 (モジュールB)
-3. 建物の抽出とデータのアラインメント (モジュールA)
-4. LiDAR データと LOD2 データの結合 (モジュールA)
-5. 更新箇所検出（モジュールD）
-6. iPSR アルゴリズムを使用してメッシュを作成する (モジュールC)
+![データーキテクチャ](images/data_architecture.png)
 
-このリポジトリではD. 更新箇所検出のモジュールのみを公開しており、その他のモジュールについては別のリポジトリとなります。
+| モジュール | 処理ステップ | 対応スクリプト |
+|:----------|:------------|:------------|
+| A. 入力データ処理<br>（[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/LiDAR-data-processing-pipeline)） | (1) ノイズ除去<br>(2) 建物抽出<br><br>(3) 点群合成 | - <br>01_create_footprint_polygons.py<br>02_polygon_expansion.py<br>04_split_dataset_points_to_buildings_with_realignment.py |
+| B. 変更箇所特定 | (4) 変更箇所特定 | pointcloud_similarity.py |
+| C. 3Dメッシュ再構築<br>（[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/LiDAR-data-processing-pipeline)） | (5) メッシュ再構築<br><br>(6) 窓検出 | 05_combine_lod2_and_point_cloud.py<br>06_run_iPSR.py<br>05_combine_lod2_and_point_cloud.py |
 
-## はじめに（Dockerを使った場合）
+本リポジトリは「B. 変更箇所特定モジュール」を含んでおり、「A. 入力データ処理モジュール」と「C. 3Dメッシュ再構築モジュール」は、[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/LiDAR-data-processing-pipeline)にて公開しています。
 
-nvidia-dockerをインストールしてください。
+## 3. 利用手順
 
-## データ
+### 動作環境
+本プログラムは Linux にインストールされた Python 3.8 で動作確認を行なっています。他のプラットフォームや Python のバージョンで動作させるには、ソースコードや設定ファイルの修正が必要になることがあります。
 
-圧縮されたapolloデータセットを[ここ](https://www.ipb.uni-bonn.de/html/projects/dcpcr/apollo-compressed.zip)からダウンロードして、`/dcpcr/Makefile` を設定することで、データセットをDockerコンテナにリンクさせてください。
-
+### DCPCRのインストール
+まず、以下のコマンドを実行し、DCPCRをインストールします。
 ```sh
-DATA=<path-to-your-data>
+pip3 install -e .
 ```
 
-視覚化と非圧縮データの微調整には、まずapolloデータをダウンロードし、 `/dcpcr/scripts/apollo_aggregation.py` スクリプトを使って密なポイントクラウドを計算する必要があります。これには約500 GBが必要です。圧縮データ上の登録を視覚化することもできますが、低解像度のため、見づらいです。
+学習済みのDCPCRモデルを[ここ](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) からダウンロードし、ルートフォルダに保存します。
 
-## Dockerコンテナのビルド
-
-ルートディレクトリで以下を実行して、Dockerコンテナをビルドします。
-
+### その他の前提ライブラリのインストール
+次に、以下のコマンドを実行し、その他の Python の前提ライブラリをインストールします。
 ```sh
-make build
+pip3 install -r requirements.txt
 ```
 
-## コードの実行
+### データの準備
 
-最初のステップは、`dcpcr/`の中でDockerコンテナを実行することです。
+[ここ](https://plateau-uc22-0053-data.s3.ap-northeast-1.amazonaws.com/20230207_building_changes_detection_data.zip)から、サンプルデータを取得してください。
 
-```sh
-make run
+zip ファイルを解凍すると、2つのフォルダが現れます。
+* `LOD2`: LOD2モデルから変換した点群データ(target).
+* `Newpcd`: LiDARで取得した点群データ(source).
+
+それぞれのフォルダは `BLUE` / `GREEN` / `RED` / `YELLOW` のサブフォルダを含み、正解（Ground truth）の異動クラスを与えます。
+* `BLUE`: **増改築（Modified）** された建物
+* `GREEN`: **滅失後新築（Reconstructed）** された建物
+* `RED`: **滅失（Destructed）** した建物
+* `YELLOW`: **新築（Newly Constructed）** された建物
+
+※ 新築された建物のLOD2モデルは存在しないため、LOD2フォルダにYELLOWは含まれません。
+
+
+### 設定ファイルの編集
+
+`pointcloud_similarity.yaml` 内の各パラメータを編集します。
+| パラメータ    | 説明                         |
+|:-------------|:-----------------------------|
+| checkpoint   | 学習済みDCPCRモデルファイル (.ckpt) のパス |
+| lod2_path    | LOD2モデルから変換した点群データが格納されているパス |
+| pcd_path     | LiDARで取得した点群データが格納されているパス |
+
+### スクリプトの実行
+以下のようにクリプトを実行します。
 ```
-もし、Dockerコンテナの実行が次のエラーで失敗した場合（--gpuフラグのため）:
-> docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]].
-
-[ここ](https://askubuntu.com/questions/1400476/docker-error-response-from-daemon-could-not-select-device-driver-with-capab)で解決策が見つかります。
-
-以下のコマンドは、Dockerコンテナ内で実行することを想定しています。
-
-### トレーニング
-
-ネットワークをトレーニングするには、まずすべてのパラメータを含む設定ファイルを作成する必要があります。  
-設定ファイルのサンプルは `/dcpcr/config/config.yaml` にあります。
-ネットワークをトレーニングするには、以下を実行してください。
-
-```sh
-python3 trainer -c <path-to-your-config>
+python pointcloud_similarity.py [オプション]
 ```
 
-### 評価
+スクリプトは以下のオプションを指定することができます。
+* `-c`：設定ファイルへのパス （デフォルト： `pointcloud_similarity.yaml`）
+* `-ft`：GICPでの微調整 （デフォルト：True）
+* `-vs`：ダウンサンプリングのためのボクセルサイズ （デフォルト：0.03）
+* `-sr`：2つの建物の類似性を定義する比率 （デフォルト：50）
+* `-t`：建物が破壊されたとみなされる1スキャンあたりの最小ポイント数 （デフォルト：20）
+* `-b`：テスト対象のデータを Green / Blue / Red / Yellow から指定 （デフォルト：Blue）
 
-テストセットでのネットワークの評価は、以下のように行います。
+### 出力ファイル仕様
 
-```sh
-python3 test.py -ckpt <path-to-your-checkpoint>
-```
+`pointcloud_similarity.py` スクリプトは、スクリプトを実行した時のフォルダに Excel ファイルを出力します。
+出力ファイルは以下の項目を含みます。
+| カラム       | 説明  |
+|:------------|:------|
+| Building ID | 建物ID |
+| Prediction  | 推定された異動クラス<br>  ・ Modified: 増改築<br> ・ Reconstructed: 滅失後新築<br> ・ Destructed: 滅失<br> ・ Newly Constructed: 新築 |
+| Ground truth | 正解の異動クラス |
 
-すべての結果は、`dcpcr/experiments` のディレクトリに保存されます。圧縮データで微調整するときには `-dt 1` を使用し、非圧縮データの場合は `-dt 5` を使用しました。
+![出力ファイルの例](images/Modified_results.png)
 
-### 定性的な結果
-
-`dcpcr/scripts/qualitative` には、結果を視覚化するスクリプトがいくつかあります。
-
-### 事前学習済みモデル
-
-モデルの事前学習済みの重みは、[ここ](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt) で見つけることができます。
-
-## はじめに（Dockerを使わない場合）
-
-### インストール
-
-すべての依存関係とインストール手順は、Dockerfileから導出することができます。
-`pip3 install -e .` を使用して、dcpcrをインストールしてください。
-
-### コードの実行
-
-スクリプトは、以前と同様にDockerコンテナ内で実行することができます。ただし、`dcpcr/config/data_config.yaml` を更新する必要があるかもしれません。
-
-## 他のポイントクラウドデータでの推論
-
-Apollo以外のデータでモデルをテストするには、以下のスクリプトを実行できます。
-
-データが `.pcd` 形式の場合：
-```sh
-python inference.py -ckpt [path_to_checkpoint] [optional] -ft False
-```
-データが `.las` 形式の場合：
-```sh
-python las_inference.py -ckpt [path_to_checkpoint] [optional] -ft False
-```
-推論には、事前学習済みの[モデル](https://www.ipb.uni-bonn.de/html/projects/dcpcr/model_paper.ckpt)を使用することをお勧めします。
-
-推論スクリプトは、Dockerコンテナ内で完全には実行できません（open3dの視覚化のため）。登録結果を視覚化したい場合は、これらのスクリプトはDockerコンテナの外で実行する必要があります。
-
-## ポイントクラウドの類似性（建物分類）
-`pointcloud_similarity.py` スクリプトは、建物分類タスクを担当しています。このタスクを実行するために、DCPCRとGICPに依存しています。コードの実行方法に関する詳細は、[このリンク](./documentation/README.md)で見つけることができます。
-
-## ライセンス
+## 4. ライセンス
 * 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/site-policy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。
 
-## 注意事項
+## 5. 注意事項
 * 本レポジトリは参考資料として提供しているものです。動作保証は行っておりません。
 * 予告なく変更・削除する可能性があります。
 * 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
-## 参考資料
-* （近日公開）技術検証レポート: https://www.mlit.go.jp/plateau/libraries/technical-reports/
+## 6. 参考資料
+* 技術検証レポート: https://www.mlit.go.jp/plateau/file/libraries/doc/plateau_tech_doc_0053_ver01.pdf
+
