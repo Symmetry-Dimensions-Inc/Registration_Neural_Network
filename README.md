@@ -16,6 +16,8 @@
 
 本リポジトリは「B. 変更箇所特定モジュール」を含んでおり、「A. 入力データ処理モジュール」と「C. 3Dメッシュ再構築モジュール」は、[別リポジトリ](https://github.com/Symmetry-Dimensions-Inc/LiDAR-data-processing-pipeline)にて公開しています。
 
+## 3. 利用手順
+
 ### 動作環境
 本プログラムは Linux にインストールされた Python 3.8 で動作確認を行なっています。他のプラットフォームや Python のバージョンで動作させるには、ソースコードや設定ファイルの修正が必要になることがあります。
 
@@ -85,14 +87,14 @@ python pointcloud_similarity.py [オプション]
 
 ![出力ファイルの例](images/Modified_results.png)
 
-## ライセンス
+## 4. ライセンス
 * 本ドキュメントは[Project PLATEAUのサイトポリシー](https://www.mlit.go.jp/plateau/site-policy/)（CCBY4.0および政府標準利用規約2.0）に従い提供されています。
 
-## 注意事項
+## 5. 注意事項
 * 本レポジトリは参考資料として提供しているものです。動作保証は行っておりません。
 * 予告なく変更・削除する可能性があります。
 * 本レポジトリの利用により生じた損失及び損害等について、国土交通省はいかなる責任も負わないものとします。
 
-## 参考資料
+## 6. 参考資料
 * 技術検証レポート: https://www.mlit.go.jp/plateau/file/libraries/doc/plateau_tech_doc_0053_ver01.pdf
 
