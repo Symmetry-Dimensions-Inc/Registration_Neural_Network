@@ -6,7 +6,7 @@ torch==1.12.1+cu116
 pytorch_lightning==1.6.0
 tqdm==4.64.0
 open3d==0.15.2
-numpy==1.17.4
+numpy==1.18.0
 matplotlib==3.4.2
 Click==7.0
 PyYAML==6.0
